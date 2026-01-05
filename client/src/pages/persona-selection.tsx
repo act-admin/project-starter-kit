@@ -429,13 +429,49 @@ export default function PersonaSelection() {
             <Agents persona={selectedPersona || "generic"} />
           )}
           {activeNavItem === "Admin" && <Admin />}
+          {activeNavItem === "Settings" && (
+            <div className="p-8" data-testid="page-settings">
+              <h1 className="text-3xl font-bold text-foreground mb-6">Settings</h1>
+              <div className="space-y-6 max-w-2xl">
+                <div className="bg-card border border-border rounded-lg p-6">
+                  <h2 className="text-lg font-semibold text-foreground mb-4">General Settings</h2>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-foreground">Notifications</p>
+                        <p className="text-sm text-muted-foreground">Receive email notifications</p>
+                      </div>
+                      <div className="w-12 h-6 bg-primary rounded-full relative cursor-pointer">
+                        <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-foreground">Auto-save</p>
+                        <p className="text-sm text-muted-foreground">Automatically save your work</p>
+                      </div>
+                      <div className="w-12 h-6 bg-primary rounded-full relative cursor-pointer">
+                        <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-card border border-border rounded-lg p-6">
+                  <h2 className="text-lg font-semibold text-foreground mb-4">Account</h2>
+                  <p className="text-sm text-muted-foreground">Manage your account settings and preferences.</p>
+                </div>
+              </div>
+            </div>
+          )}
           {activeNavItem &&
             ![
               "Dashboard",
               "Analytics",
               "Feedback",
+              "Data Feedback",
               "Repository",
               "Admin",
+              "Settings",
               "",
             ].includes(activeNavItem) && (
               <div className="p-8" data-testid="page-coming-soon">
