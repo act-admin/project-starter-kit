@@ -9,29 +9,37 @@ from config import (AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_API_KEY,
 # Custom HTTP client with default settings and explicit timeout
 http_client = httpx.Client(
     timeout=httpx.Timeout(30.0, connect=10.0),  # Adjust timeout as needed
-    # No proxies parameter; relies on environment or default behavior
 )
 
-# Initialize Azure OpenAI client with proper type handling
-if not AZURE_OPENAI_ENDPOINT:
-    raise ValueError("AZURE_OPENAI_ENDPOINT is required")
+# Initialize Azure OpenAI client with proper type handling (optional)
+client = None
 
-if USE_ENTRA_ID:
-    credential = DefaultAzureCredential()
-    token_provider = lambda: credential.get_token(
-        "https://cognitiveservices.azure.com/.default").token
-    client = AzureOpenAI(azure_endpoint=AZURE_OPENAI_ENDPOINT,
-                         azure_ad_token_provider=token_provider,
-                         api_version=AZURE_OPENAI_API_VERSION or "2024-02-01",
-                         http_client=http_client)
+if AZURE_OPENAI_ENDPOINT:
+    if USE_ENTRA_ID:
+        try:
+            credential = DefaultAzureCredential()
+            token_provider = lambda: credential.get_token(
+                "https://cognitiveservices.azure.com/.default").token
+            client = AzureOpenAI(azure_endpoint=AZURE_OPENAI_ENDPOINT,
+                                 azure_ad_token_provider=token_provider,
+                                 api_version=AZURE_OPENAI_API_VERSION or "2024-02-01",
+                                 http_client=http_client)
+            print("✅ Azure OpenAI client initialized with Entra ID")
+        except Exception as e:
+            print(f"⚠️  Failed to initialize Azure OpenAI with Entra ID: {e}")
+    elif AZURE_OPENAI_API_KEY:
+        try:
+            client = AzureOpenAI(azure_endpoint=AZURE_OPENAI_ENDPOINT,
+                                 api_key=AZURE_OPENAI_API_KEY,
+                                 api_version=AZURE_OPENAI_API_VERSION or "2024-02-01",
+                                 http_client=http_client)
+            print("✅ Azure OpenAI client initialized with API key")
+        except Exception as e:
+            print(f"⚠️  Failed to initialize Azure OpenAI with API key: {e}")
+    else:
+        print("⚠️  AZURE_OPENAI_API_KEY is required when not using Entra ID - NLQ features disabled")
 else:
-    if not AZURE_OPENAI_API_KEY:
-        raise ValueError(
-            "AZURE_OPENAI_API_KEY is required when not using Entra ID")
-    client = AzureOpenAI(azure_endpoint=AZURE_OPENAI_ENDPOINT,
-                         api_key=AZURE_OPENAI_API_KEY,
-                         api_version=AZURE_OPENAI_API_VERSION or "2024-02-01",
-                         http_client=http_client)
+    print("⚠️  AZURE_OPENAI_ENDPOINT not configured - NLQ features disabled")
 
 
 def extract_year_from_nlq(nlq: str) -> int:
@@ -131,6 +139,9 @@ def nlq_to_sql(nlq: str) -> str:
     """
     Converts natural language query to Snowflake SQL using Azure OpenAI.
     """
+    if client is None:
+        raise ValueError("Azure OpenAI client not configured. Please set AZURE_OPENAI_ENDPOINT and AZURE_OPENAI_API_KEY environment variables.")
+    
     prompt = f"""
     You are a SQL expert for Snowflake. Convert this natural language query to a valid Snowflake SQL query.
     
@@ -254,6 +265,9 @@ def summarize_unstructured(content: str, summary_prompt: str) -> str:
     """
     Summarizes unstructured text with short, focused, digestible insights.
     """
+    if client is None:
+        return "Azure OpenAI not configured - unable to summarize content."
+    
     response = client.chat.completions.create(
         model=AZURE_OPENAI_DEPLOYMENT_NAME,
         messages=[{

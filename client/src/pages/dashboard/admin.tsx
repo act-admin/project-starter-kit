@@ -281,9 +281,9 @@ export default function Admin() {
 
   return (
     <div className="p-8 space-y-8" data-testid="page-admin">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Admin Panel</h1>
-          <p className="text-muted-foreground">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-foreground">Admin Panel</h1>
+          <p className="text-sm text-muted-foreground mt-1">
             Explore prebuilt AI agents to automate your workflows
           </p>
         </div>
@@ -317,31 +317,42 @@ export default function Admin() {
                   return (
                     <Card
                       key={agent.id}
-                      className="p-5 hover:shadow-md transition-all duration-200 cursor-pointer group"
+                      className="p-6 bg-white border border-gray-100 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-all duration-200 cursor-pointer group"
                       data-testid={`card-agent-${agent.id}`}
                     >
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/20 transition-colors">
-                          <Icon className="w-5 h-5 text-primary" />
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+                          <Icon className="w-4 h-4 text-[#3B5998]" />
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2 mb-1">
-                            <h3 className="text-sm font-semibold text-foreground leading-tight">
-                              {agent.name}
-                            </h3>
-                            <Badge
-                              variant="outline"
-                              className={`text-[10px] px-1.5 py-0 h-5 ${getStatusColor(agent.status)} flex-shrink-0`}
-                            >
-                              {agent.status === "coming-soon"
-                                ? "Soon"
-                                : agent.status}
-                            </Badge>
-                          </div>
-                          <p className="text-xs text-muted-foreground leading-relaxed">
-                            {agent.description}
-                          </p>
+                        <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center">
+                          <Zap className="w-4 h-4 text-[#22C55E]" />
                         </div>
+                        <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center">
+                          <Sparkles className="w-4 h-4 text-[#E8744E]" />
+                        </div>
+                      </div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-2">
+                        {agent.name}
+                      </h3>
+                      <p className="text-sm text-gray-500 mb-4 leading-relaxed">
+                        {agent.description}
+                      </p>
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        <span className={`px-3 py-1.5 text-xs font-medium rounded-full ${
+                          agent.status === "active" ? "bg-green-50 text-[#22C55E]" :
+                          agent.status === "beta" ? "bg-blue-50 text-[#3B5998]" :
+                          "bg-gray-50 text-gray-500"
+                        }`}>
+                          {agent.status === "coming-soon" ? "Soon" : agent.status}
+                        </span>
+                        <span className="px-3 py-1.5 text-xs font-medium rounded-full bg-orange-50 text-[#E8744E]">
+                          {agent.category}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="px-3 py-1.5 text-xs font-medium text-gray-500 bg-white border border-gray-200 rounded-full">AI Model</span>
+                        <span className="px-3 py-1.5 text-xs font-medium text-gray-500 bg-white border border-gray-200 rounded-full">Automation</span>
+                        <span className="px-3 py-1.5 text-xs font-medium text-gray-400 bg-gray-50 border border-gray-200 rounded-full">+2</span>
                       </div>
                     </Card>
                   );

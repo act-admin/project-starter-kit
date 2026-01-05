@@ -14,12 +14,23 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 # Import the existing NLQ processing logic
 from main import process_nlq
 
-# Initialize Azure OpenAI client
-openai_client = AzureOpenAI(
-    api_key=os.getenv('AZURE_OPENAI_API_KEY'),
-    api_version=os.getenv('AZURE_OPENAI_API_VERSION', '2024-12-01-preview'),
-    azure_endpoint=os.getenv('AZURE_OPENAI_ENDPOINT')
-)
+# Initialize Azure OpenAI client (optional - only if credentials are available)
+openai_client = None
+azure_endpoint = os.getenv('AZURE_OPENAI_ENDPOINT')
+azure_api_key = os.getenv('AZURE_OPENAI_API_KEY')
+
+if azure_endpoint and azure_api_key:
+    try:
+        openai_client = AzureOpenAI(
+            api_key=azure_api_key,
+            api_version=os.getenv('AZURE_OPENAI_API_VERSION', '2024-12-01-preview'),
+            azure_endpoint=azure_endpoint
+        )
+        print("✅ Azure OpenAI client initialized in Flask app")
+    except Exception as e:
+        print(f"⚠️  Failed to initialize Azure OpenAI client: {e}")
+else:
+    print("⚠️  Azure OpenAI credentials not configured - AI features will be limited")
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -74,6 +85,15 @@ def create_human_readable_summary(query: str, results_text: str) -> str:
                 results_context = f"Result: {formatted_value}"
             except:
                 results_context = f"Result: {results_text}"
+
+        # Check if OpenAI client is available
+        if openai_client is None:
+            try:
+                value = float(results_text.replace(',', ''))
+                formatted_value = f"${value:,.2f}" if value >= 0 else f"-${abs(value):,.2f}"
+                return f"Based on your query, the result is {formatted_value}."
+            except:
+                return f"Based on your query, the result is {results_text}."
 
         # Generate conversational response using Azure OpenAI
         response = openai_client.chat.completions.create(
@@ -187,18 +207,21 @@ def process_nlq_endpoint():
                 is_action_request = any(word in nlq_lower for word in ['approve', 'reject', 'update', 'change status', 'modify'])
 
                 # Generate AI-powered response with real invoice data
-                if is_action_request:
-                    # Get today's date for approval date
-                    from datetime import datetime
-                    today = datetime.now().strftime('%Y-%m-%d')
+                if openai_client is None:
+                    ai_summary = f"**Invoice Summary**\n\nFound {summary['count']} invoices totaling ${summary['total']:,.2f}.\n\n{invoice_details}\n\nView details in GenAI Suite dashboard below."
+                else:
+                    if is_action_request:
+                        # Get today's date for approval date
+                        from datetime import datetime
+                        today = datetime.now().strftime('%Y-%m-%d')
 
-                    # For action requests, show detailed success confirmation
-                    invoice_response = openai_client.chat.completions.create(
-                        model=os.getenv('AZURE_OPENAI_DEPLOYMENT_NAME', 'cdss-openai'),
-                        messages=[
-                            {
-                                "role": "system",
-                                "content": f"""You are an AI assistant for accounts payable. For approval requests, provide a detailed success confirmation.
+                        # For action requests, show detailed success confirmation
+                        invoice_response = openai_client.chat.completions.create(
+                            model=os.getenv('AZURE_OPENAI_DEPLOYMENT_NAME', 'cdss-openai'),
+                            messages=[
+                                {
+                                    "role": "system",
+                                    "content": f"""You are an AI assistant for accounts payable. For approval requests, provide a detailed success confirmation.
 
 FORMAT FOR APPROVAL CONFIRMATION:
 Show approval success details professionally with all relevant information.
@@ -215,39 +238,39 @@ EXAMPLE:
 **Payment Update**: Invoice has been queued for payment processing. Payment will be processed within 2-3 business days. Vendor notification email sent automatically.
 
 View complete details in GenAI Suite dashboard below."""
-                            },
-                            {
-                                "role": "user",
-                                "content": f"User asked: '{nlq}'\n\nInvoice:\n{invoice_details}\n\nGenerate a detailed approval success confirmation showing invoice ID, vendor, status change, invoice amount, approval method (Manager Approval), approval date ({today}), and payment update message. Make it look professional and complete."
-                            }
-                        ],
-                        temperature=0.7,
-                        max_tokens=250
-                    )
-                else:
-                    # For viewing queries, keep concise format
-                    invoice_response = openai_client.chat.completions.create(
-                        model=os.getenv('AZURE_OPENAI_DEPLOYMENT_NAME', 'cdss-openai'),
-                        messages=[
-                            {
-                                "role": "system",
-                                "content": """You are an AI assistant for invoice information. Provide CONCISE responses.
+                                },
+                                {
+                                    "role": "user",
+                                    "content": f"User asked: '{nlq}'\n\nInvoice:\n{invoice_details}\n\nGenerate a detailed approval success confirmation showing invoice ID, vendor, status change, invoice amount, approval method (Manager Approval), approval date ({today}), and payment update message. Make it look professional and complete."
+                                }
+                            ],
+                            temperature=0.7,
+                            max_tokens=250
+                        )
+                    else:
+                        # For viewing queries, keep concise format
+                        invoice_response = openai_client.chat.completions.create(
+                            model=os.getenv('AZURE_OPENAI_DEPLOYMENT_NAME', 'cdss-openai'),
+                            messages=[
+                                {
+                                    "role": "system",
+                                    "content": """You are an AI assistant for invoice information. Provide CONCISE responses.
 
 FORMAT:
 **Status**: **Count** totaling **$Amount**
 • **Vendor** - **Invoice ID** - **$Amount** - Due: Date
 
 View details in GenAI Suite dashboard below."""
-                            },
-                            {
-                                "role": "user",
-                                "content": f"User asked: '{nlq}'\n\nInvoice Data:\n{invoice_details}\n\nTotal: {summary['count']} invoices, ${summary['total']:,.2f}\n\nProvide a concise response (3-4 lines) with bullet points and bold for key info."
-                            }
-                        ],
-                        temperature=0.7,
-                        max_tokens=150
-                    )
-                ai_summary = invoice_response.choices[0].message.content.strip()
+                                },
+                                {
+                                    "role": "user",
+                                    "content": f"User asked: '{nlq}'\n\nInvoice Data:\n{invoice_details}\n\nTotal: {summary['count']} invoices, ${summary['total']:,.2f}\n\nProvide a concise response (3-4 lines) with bullet points and bold for key info."
+                                }
+                            ],
+                            temperature=0.7,
+                            max_tokens=150
+                        )
+                    ai_summary = invoice_response.choices[0].message.content.strip() if invoice_response.choices[0].message.content else ""
 
             except Exception as e:
                 print(f"Error fetching or processing invoice data: {e}", flush=True)
@@ -334,18 +357,21 @@ View details in GenAI Suite dashboard below."""
                 print(f"AR is_action_request: {is_action_request}", flush=True)
 
                 # Generate AI-powered response with real AR invoice data
-                if is_action_request:
-                    # Get today's date for payment date
-                    from datetime import datetime
-                    today = datetime.now().strftime('%Y-%m-%d')
+                if openai_client is None:
+                    ai_summary = f"**AR Invoice Summary**\n\nFound {summary['count']} invoices totaling ${summary['total']:,.2f}.\n\n{invoice_details}\n\nView details in GenAI Suite dashboard below."
+                else:
+                    if is_action_request:
+                        # Get today's date for payment date
+                        from datetime import datetime
+                        today = datetime.now().strftime('%Y-%m-%d')
 
-                    # For action requests, show detailed success confirmation
-                    invoice_response = openai_client.chat.completions.create(
-                        model=os.getenv('AZURE_OPENAI_DEPLOYMENT_NAME', 'cdss-openai'),
-                        messages=[
-                            {
-                                "role": "system",
-                                "content": f"""You are an AI assistant for accounts receivable. For status change requests, provide a detailed success confirmation.
+                        # For action requests, show detailed success confirmation
+                        invoice_response = openai_client.chat.completions.create(
+                            model=os.getenv('AZURE_OPENAI_DEPLOYMENT_NAME', 'cdss-openai'),
+                            messages=[
+                                {
+                                    "role": "system",
+                                    "content": f"""You are an AI assistant for accounts receivable. For status change requests, provide a detailed success confirmation.
 
 FORMAT FOR STATUS CHANGE CONFIRMATION:
 Show payment success details professionally with all relevant information.
@@ -362,39 +388,39 @@ EXAMPLE:
 **Account Update**: Manufacturing Plus account balance is now $0.00. Customer maintains excellent payment rating. Automatic thank you email sent to customer contact.
 
 View complete details in GenAI Suite dashboard below."""
-                            },
-                            {
-                                "role": "user",
-                                "content": f"User asked: '{nlq}'\n\nInvoice:\n{invoice_details}\n\nGenerate a detailed payment success confirmation showing invoice ID, customer, status change, payment amount, payment method (Wire Transfer), payment date ({today}), and account update message. Make it look professional and complete."
-                            }
-                        ],
-                        temperature=0.7,
-                        max_tokens=250
-                    )
-                else:
-                    # For viewing queries, keep concise format
-                    invoice_response = openai_client.chat.completions.create(
-                        model=os.getenv('AZURE_OPENAI_DEPLOYMENT_NAME', 'cdss-openai'),
-                        messages=[
-                            {
-                                "role": "system",
-                                "content": """You are an AI assistant for accounts receivable information. Provide CONCISE responses.
+                                },
+                                {
+                                    "role": "user",
+                                    "content": f"User asked: '{nlq}'\n\nInvoice:\n{invoice_details}\n\nGenerate a detailed payment success confirmation showing invoice ID, customer, status change, payment amount, payment method (Wire Transfer), payment date ({today}), and account update message. Make it look professional and complete."
+                                }
+                            ],
+                            temperature=0.7,
+                            max_tokens=250
+                        )
+                    else:
+                        # For viewing queries, keep concise format
+                        invoice_response = openai_client.chat.completions.create(
+                            model=os.getenv('AZURE_OPENAI_DEPLOYMENT_NAME', 'cdss-openai'),
+                            messages=[
+                                {
+                                    "role": "system",
+                                    "content": """You are an AI assistant for accounts receivable information. Provide CONCISE responses.
 
 FORMAT:
 **Status**: **Count** totaling **$Amount**
 • **Customer** - **Invoice ID** - **$Amount** - Due: Date
 
 View details in GenAI Suite dashboard below."""
-                            },
-                            {
-                                "role": "user",
-                                "content": f"User asked: '{nlq}'\n\nAR Invoice Data:\n{invoice_details}\n\nTotal: {summary['count']} invoices, ${summary['total']:,.2f}\n\nProvide a concise response (3-4 lines) with bullet points and bold for key info."
-                            }
-                        ],
-                        temperature=0.7,
-                        max_tokens=150
-                    )
-                ai_summary = invoice_response.choices[0].message.content.strip()
+                                },
+                                {
+                                    "role": "user",
+                                    "content": f"User asked: '{nlq}'\n\nAR Invoice Data:\n{invoice_details}\n\nTotal: {summary['count']} invoices, ${summary['total']:,.2f}\n\nProvide a concise response (3-4 lines) with bullet points and bold for key info."
+                                }
+                            ],
+                            temperature=0.7,
+                            max_tokens=150
+                        )
+                    ai_summary = invoice_response.choices[0].message.content.strip() if invoice_response.choices[0].message.content else ""
 
             except Exception as e:
                 print(f"Error fetching or processing AR invoice data: {e}", flush=True)
@@ -553,9 +579,12 @@ View details in GenAI Suite dashboard below."""
 
     except Exception as e:
         print(f"API Error: {e}")
+        query_value = ''
+        if 'data' in dir() and data is not None and isinstance(data, dict):
+            query_value = data.get('query', '')
         return jsonify({
             'error': f'Internal server error: {str(e)}',
-            'query': data.get('query', '') if 'data' in locals() else '',
+            'query': query_value,
             'sql': '',
             'results': []
         }), 500

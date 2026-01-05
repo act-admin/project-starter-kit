@@ -22,6 +22,9 @@ import {
   Image as ImageIcon,
   FileText,
   Table,
+  HardDrive,
+  Layers,
+  Settings,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -190,63 +193,114 @@ export default function DataFeedback({ persona }: DataFeedbackProps) {
 
   return (
     <div className="p-8 space-y-6" data-testid="page-data-feedback">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-foreground mb-2 flex items-center gap-3">
-          <Tag className="w-8 h-8" />
-          Data Feedback & Tagging
-        </h1>
-        <p className="text-muted-foreground">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-foreground">Data Feedback & Tagging</h1>
+        <p className="text-sm text-muted-foreground mt-1">
           Connect to cloud storage, select data, add tags, and manage your data feedback lifecycle
         </p>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="p-6 bg-gradient-to-br from-[#3699FF] to-[#1A69FF] text-white shadow-lg">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 rounded-lg bg-white/20 flex items-center justify-center">
-              <Database className="w-6 h-6" />
+        <Card className="p-6 bg-white border border-gray-100 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-shadow">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+              <Database className="w-4 h-4 text-[#3B5998]" />
+            </div>
+            <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center">
+              <HardDrive className="w-4 h-4 text-[#22C55E]" />
+            </div>
+            <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center">
+              <Layers className="w-4 h-4 text-[#E8744E]" />
             </div>
           </div>
-          <div className="text-3xl font-bold mb-1">{dataItems.length}</div>
-          <div className="text-sm text-white/90">Available Files</div>
+          <h3 className="text-lg font-bold text-gray-900 mb-2">Available Files</h3>
+          <p className="text-sm text-gray-500 mb-3">Files ready for tagging</p>
+          <div className="text-3xl font-bold text-gray-900 mb-3">{dataItems.length}</div>
+          <div className="flex flex-wrap gap-2 mb-3">
+            <span className="px-3 py-1.5 text-xs font-medium rounded-full bg-blue-50 text-[#3B5998]">Data Storage</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="px-3 py-1.5 text-xs font-medium text-gray-500 bg-white border border-gray-200 rounded-full">Files</span>
+            <span className="px-3 py-1.5 text-xs font-medium text-gray-400 bg-gray-50 border border-gray-200 rounded-full">+2</span>
+          </div>
         </Card>
 
-        <Card className="p-6 bg-gradient-to-br from-[#1BC5BD] to-[#0BB7A4] text-white shadow-lg">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 rounded-lg bg-white/20 flex items-center justify-center">
-              <Check className="w-6 h-6" />
+        <Card className="p-6 bg-white border border-gray-100 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-shadow">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center">
+              <Check className="w-4 h-4 text-[#22C55E]" />
+            </div>
+            <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center">
+              <Settings className="w-4 h-4 text-[#3B5998]" />
+            </div>
+            <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center">
+              <File className="w-4 h-4 text-[#14B8A6]" />
             </div>
           </div>
-          <div className="text-3xl font-bold mb-1">{selectedItems.size}</div>
-          <div className="text-sm text-white/90">Selected Items</div>
+          <h3 className="text-lg font-bold text-gray-900 mb-2">Selected Items</h3>
+          <p className="text-sm text-gray-500 mb-3">Items selected for bulk operations</p>
+          <div className="text-3xl font-bold text-gray-900 mb-3">{selectedItems.size}</div>
+          <div className="flex flex-wrap gap-2 mb-3">
+            <span className="px-3 py-1.5 text-xs font-medium rounded-full bg-green-50 text-[#22C55E]">Selection</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="px-3 py-1.5 text-xs font-medium text-gray-500 bg-white border border-gray-200 rounded-full">Bulk Ops</span>
+            <span className="px-3 py-1.5 text-xs font-medium text-gray-400 bg-gray-50 border border-gray-200 rounded-full">+1</span>
+          </div>
         </Card>
 
-        <Card className="p-6 bg-gradient-to-br from-[#FFA800] to-[#EE9700] text-white shadow-lg">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 rounded-lg bg-white/20 flex items-center justify-center">
-              <Tag className="w-6 h-6" />
+        <Card className="p-6 bg-white border border-gray-100 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-shadow">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center">
+              <Tag className="w-4 h-4 text-[#E8744E]" />
+            </div>
+            <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center">
+              <Filter className="w-4 h-4 text-[#3B5998]" />
+            </div>
+            <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center">
+              <Search className="w-4 h-4 text-[#22C55E]" />
             </div>
           </div>
-          <div className="text-3xl font-bold mb-1">{allTags.length}</div>
-          <div className="text-sm text-white/90">Unique Tags</div>
+          <h3 className="text-lg font-bold text-gray-900 mb-2">Unique Tags</h3>
+          <p className="text-sm text-gray-500 mb-3">Tags available for filtering</p>
+          <div className="text-3xl font-bold text-gray-900 mb-3">{allTags.length}</div>
+          <div className="flex flex-wrap gap-2 mb-3">
+            <span className="px-3 py-1.5 text-xs font-medium rounded-full bg-orange-50 text-[#E8744E]">Tagging</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="px-3 py-1.5 text-xs font-medium text-gray-500 bg-white border border-gray-200 rounded-full">Labels</span>
+            <span className="px-3 py-1.5 text-xs font-medium text-gray-400 bg-gray-50 border border-gray-200 rounded-full">+2</span>
+          </div>
         </Card>
 
-        <Card className="p-6 bg-gradient-to-br from-[#8950FC] to-[#7337EE] text-white shadow-lg">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 rounded-lg bg-white/20 flex items-center justify-center">
-              <Cloud className="w-6 h-6" />
+        <Card className="p-6 bg-white border border-gray-100 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-shadow">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center">
+              <Cloud className="w-4 h-4 text-[#14B8A6]" />
+            </div>
+            <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center">
+              <Database className="w-4 h-4 text-[#E8744E]" />
+            </div>
+            <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center">
+              <FolderOpen className="w-4 h-4 text-[#3B5998]" />
             </div>
           </div>
-          <div className="text-3xl font-bold mb-1">{getDataSources().length}</div>
-          <div className="text-sm text-white/90">Data Sources</div>
+          <h3 className="text-lg font-bold text-gray-900 mb-2">Data Sources</h3>
+          <p className="text-sm text-gray-500 mb-3">Connected cloud providers</p>
+          <div className="text-3xl font-bold text-gray-900 mb-3">{getDataSources().length}</div>
+          <div className="flex flex-wrap gap-2 mb-3">
+            <span className="px-3 py-1.5 text-xs font-medium rounded-full bg-teal-50 text-[#14B8A6]">Cloud Storage</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="px-3 py-1.5 text-xs font-medium text-gray-500 bg-white border border-gray-200 rounded-full">AWS</span>
+            <span className="px-3 py-1.5 text-xs font-medium text-gray-500 bg-white border border-gray-200 rounded-full">Azure</span>
+            <span className="px-3 py-1.5 text-xs font-medium text-gray-400 bg-gray-50 border border-gray-200 rounded-full">+2</span>
+          </div>
         </Card>
       </div>
 
-      {/* Data Source Selection */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="p-6">
+        <Card className="p-6 bg-white border border-gray-100 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
           <h2 className="text-lg font-semibold text-foreground mb-4">Select Data Source</h2>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
@@ -277,7 +331,7 @@ export default function DataFeedback({ persona }: DataFeedbackProps) {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-6 bg-white border border-gray-100 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
           <h2 className="text-lg font-semibold text-foreground mb-4">Select Bucket / Container</h2>
           <select 
             value={selectedBucket} 
@@ -294,16 +348,15 @@ export default function DataFeedback({ persona }: DataFeedbackProps) {
           </select>
           {selectedBucket && (
             <p className="text-sm text-muted-foreground mt-2">
-              📁 Connected to: {selectedBucket}
+              Connected to: {selectedBucket}
             </p>
           )}
         </Card>
       </div>
 
-      {/* Search and Filter */}
       {selectedSource && selectedBucket && (
         <>
-          <Card className="p-6">
+          <Card className="p-6 bg-white border border-gray-100 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1">
                 <Label htmlFor="search">Search Files</Label>
@@ -339,8 +392,7 @@ export default function DataFeedback({ persona }: DataFeedbackProps) {
             </div>
           </Card>
 
-          {/* Data Items Table */}
-          <Card className="p-6">
+          <Card className="p-6 bg-white border border-gray-100 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold text-foreground">Files & Documents</h2>
               <div className="flex gap-2">
@@ -436,8 +488,7 @@ export default function DataFeedback({ persona }: DataFeedbackProps) {
             )}
           </Card>
 
-          {/* Tagging Panel */}
-          <Card className="p-6 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 border-2 border-primary/20">
+          <Card className="p-6 bg-white border border-gray-100 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
             <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
               <Tag className="w-5 h-5" />
               Bulk Tagging
@@ -471,7 +522,7 @@ export default function DataFeedback({ persona }: DataFeedbackProps) {
 
                 <Button 
                   onClick={saveTagging} 
-                  className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
+                  className="w-full bg-[#22C55E] hover:bg-[#16A34A]"
                   data-testid="button-save-tagging"
                 >
                   <Save className="w-4 h-4 mr-2" />
@@ -481,7 +532,7 @@ export default function DataFeedback({ persona }: DataFeedbackProps) {
 
               <div>
                 <Label>Available Tags</Label>
-                <div className="mt-2 flex flex-wrap gap-2 p-4 bg-background rounded-lg border border-border min-h-[100px]">
+                <div className="mt-2 flex flex-wrap gap-2 p-4 bg-gray-50 rounded-lg border border-border min-h-[100px]">
                   {allTags.length > 0 ? (
                     allTags.map((tag) => (
                       <Badge key={tag} variant="default" className="cursor-pointer hover:bg-primary/80">
@@ -498,9 +549,8 @@ export default function DataFeedback({ persona }: DataFeedbackProps) {
         </>
       )}
 
-      {/* Empty State */}
       {(!selectedSource || !selectedBucket) && (
-        <Card className="p-12 text-center">
+        <Card className="p-12 text-center bg-white border border-gray-100 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
           <Cloud className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
           <h3 className="text-xl font-semibold text-foreground mb-2">
             Connect to a Data Source

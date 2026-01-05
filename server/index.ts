@@ -36,16 +36,22 @@ const userNames = ['Guy Hawkins', 'Jane Cooper', 'Jacob Jones', 'Cody Fisher', '
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// MSAL configuration for service principal
-const msalConfig = {
-  auth: {
-    clientId: process.env.AZURE_CLIENT_ID!,
-    authority: `https://login.microsoftonline.com/${process.env.AZURE_TENANT_ID}`,
-    clientSecret: process.env.AZURE_CLIENT_SECRET!,
-  },
-};
+// MSAL configuration for service principal (only initialize if credentials are available)
+let cca: ConfidentialClientApplication | null = null;
 
-const cca = new ConfidentialClientApplication(msalConfig);
+if (process.env.AZURE_CLIENT_ID && process.env.AZURE_CLIENT_SECRET && process.env.AZURE_TENANT_ID) {
+  const msalConfig = {
+    auth: {
+      clientId: process.env.AZURE_CLIENT_ID,
+      authority: `https://login.microsoftonline.com/${process.env.AZURE_TENANT_ID}`,
+      clientSecret: process.env.AZURE_CLIENT_SECRET,
+    },
+  };
+  cca = new ConfidentialClientApplication(msalConfig);
+  console.log("✅ Azure MSAL client initialized");
+} else {
+  console.warn("⚠️  Azure credentials not configured - Power BI features will be disabled");
+}
 
 // Start the Python Flask application
 function startPythonApp() {
@@ -112,6 +118,14 @@ app.post('/api/clear-cache', (req, res) => {
 app.post('/api/powerbi/embed-token', async (req, res) => {
   try {
     const { reportId, groupId } = req.body;
+
+    // Check if MSAL client is available
+    if (!cca) {
+      return res.status(503).json({
+        error: 'Power BI not configured',
+        details: 'Azure credentials are not configured. Please set AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, and AZURE_TENANT_ID environment variables.'
+      });
+    }
 
     // Validate required parameters
     if (!reportId || !groupId) {
@@ -1302,17 +1316,7 @@ async function setupViteServer() {
   const vite = await createServer({
     server: { 
       middlewareMode: true,
-      allowedHosts: [
-        "be0952fa-723b-46bb-a1ff-3ebffee53e2b-00-21hmzu94pkphm.kirk.replit.dev", 
-        ".replit.dev",
-        "be0952fa-723b-46bb-a1ff-3ebffee53e2b-00-21hmzu94pkphm.kirk.repl.co",
-        ".repl.co",
-        ".kirk.repl.co",
-        "scodac-bsw.replit.app",
-        ".replit.app",
-        "billiondollarblankscreen.scodac.com",
-        ".scodac.com"
-      ]
+      allowedHosts: true
     },
     appType: "custom",
     root: path.resolve(process.cwd(), "client"),

@@ -36,7 +36,7 @@ export function ChartWidget({
 }: ChartWidgetProps) {
   return (
     <Card
-      className="p-6"
+      className="p-6 bg-white border border-gray-100 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
       data-testid={`widget-chart-${title.toLowerCase().replace(/\s+/g, "-")}`}
     >
       <div className="flex items-center justify-between mb-6">

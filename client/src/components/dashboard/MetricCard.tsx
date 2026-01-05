@@ -1,6 +1,6 @@
 import React from "react";
 import { Card } from "@/components/ui/card";
-import { ArrowUp, ArrowDown, TrendingUp, TrendingDown } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 
 interface MetricCardProps {
   label: string;
@@ -8,17 +8,18 @@ interface MetricCardProps {
   change?: string;
   trend?: 'up' | 'down';
   subtitle?: string;
-  color?: 'blue' | 'red' | 'green' | 'purple' | 'yellow' | 'cyan';
+  color?: 'blue' | 'red' | 'green' | 'purple' | 'yellow' | 'cyan' | 'orange';
   icon?: React.ReactNode;
 }
 
-const colorClasses = {
-  blue: 'from-blue-500 to-blue-600',
-  red: 'from-red-500 to-red-600',
-  green: 'from-green-500 to-green-600',
-  purple: 'from-purple-500 to-purple-600',
-  yellow: 'from-yellow-500 to-yellow-600',
-  cyan: 'from-cyan-500 to-cyan-600'
+const iconBgClasses = {
+  blue: 'bg-blue-50 text-[#3B5998]',
+  red: 'bg-red-50 text-red-500',
+  green: 'bg-green-50 text-[#22C55E]',
+  purple: 'bg-purple-50 text-purple-500',
+  yellow: 'bg-amber-50 text-amber-500',
+  cyan: 'bg-teal-50 text-[#14B8A6]',
+  orange: 'bg-orange-50 text-[#E8744E]'
 };
 
 export function MetricCard({
@@ -30,39 +31,40 @@ export function MetricCard({
   color = 'blue',
   icon
 }: MetricCardProps) {
+  const isPositive = trend === 'up';
+  
   return (
-    <Card className={`p-6 bg-gradient-to-br ${colorClasses[color]} text-white relative overflow-hidden`} data-testid={`card-metric-${label.toLowerCase().replace(/\s+/g, '-')}`}>
-      <div className="relative z-10">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-white/90">{label}</h3>
-          {icon && <div className="text-white/70">{icon}</div>}
-        </div>
-        
-        <div className="mb-2">
-          <div className="text-3xl font-bold text-white">{value}</div>
-        </div>
-
-        {(change || subtitle) && (
-          <div className="flex items-center gap-2 text-sm">
-            {change && (
-              <div className="flex items-center gap-1">
-                {trend === 'up' ? (
-                  <TrendingUp className="w-4 h-4" />
-                ) : (
-                  <TrendingDown className="w-4 h-4" />
-                )}
-                <span className="font-medium">{change}</span>
-              </div>
-            )}
-            {subtitle && (
-              <span className="text-white/70">{subtitle}</span>
-            )}
+    <Card className="p-6 bg-white border border-gray-100 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-shadow" data-testid={`card-metric-${label.toLowerCase().replace(/\s+/g, '-')}`}>
+      <div className="flex items-start justify-between mb-4">
+        <h3 className="text-sm font-medium text-gray-500">{label}</h3>
+        {icon && (
+          <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${iconBgClasses[color]}`}>
+            {icon}
           </div>
         )}
       </div>
       
-      <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-white/10 rounded-full" />
-      <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/5 rounded-full" />
+      <div className="mb-3">
+        <div className="text-3xl font-bold text-gray-900">{value}</div>
+      </div>
+
+      {(change || subtitle) && (
+        <div className="flex items-center gap-2 text-sm">
+          {change && (
+            <div className={`flex items-center gap-1 ${isPositive ? 'text-[#22C55E]' : 'text-red-500'}`}>
+              {isPositive ? (
+                <ArrowUpRight className="w-4 h-4" />
+              ) : (
+                <ArrowDownRight className="w-4 h-4" />
+              )}
+              <span className="font-medium">{change}</span>
+            </div>
+          )}
+          {subtitle && (
+            <span className="text-gray-400">{subtitle}</span>
+          )}
+        </div>
+      )}
     </Card>
   );
 }

@@ -41,52 +41,50 @@ export default function Analytics({ persona }: AnalyticsProps) {
   const [selectedChatSession, setSelectedChatSession] = useState<any>(null);
   const [selectedHistorySession, setSelectedHistorySession] = useState<any>(null);
 
-  const { data: analytics, isLoading } = useQuery({
-    queryKey: ["/api/dashboard/analytics", persona],
-    queryFn: async () => {
-      const res = await fetch(`/api/dashboard/analytics?persona=${persona}`);
-      if (!res.ok) throw new Error("Failed to fetch analytics");
-      return res.json();
-    },
-    enabled: !!persona,
-  });
+  // Mock data for analytics
+  const mockQueryAnalytics = {
+    totalQueries: 342,
+    sessions: 58,
+    queryTypeStats: { invoice: 127, report: 89, compliance: 45, other: 81 }
+  };
 
-  const { data: queryAnalytics, isLoading: queryAnalyticsLoading } = useQuery({
-    queryKey: ["/api/dashboard/query-analytics", persona],
-    queryFn: async () => {
-      const res = await fetch(
-        `/api/dashboard/query-analytics?persona=${persona}`,
-      );
-      if (!res.ok) throw new Error("Failed to fetch query analytics");
-      return res.json();
-    },
-    enabled: !!persona,
-    refetchInterval: 5000,
-  });
+  const mockChatMetrics = {
+    avgResponseTime: 1.4,
+    sentimentPercentages: { positive: 92, neutral: 6, negative: 2 },
+    responseTimeData: [
+      { time: "9AM", responseTime: 1.2 },
+      { time: "10AM", responseTime: 1.5 },
+      { time: "11AM", responseTime: 1.3 },
+      { time: "12PM", responseTime: 1.8 },
+      { time: "1PM", responseTime: 1.4 },
+      { time: "2PM", responseTime: 1.1 },
+    ],
+    queryVolumeData: [
+      { hour: "9AM", queries: 45 },
+      { hour: "10AM", queries: 62 },
+      { hour: "11AM", queries: 58 },
+      { hour: "12PM", queries: 41 },
+      { hour: "1PM", queries: 55 },
+      { hour: "2PM", queries: 72 },
+    ]
+  };
 
-  const { data: chatHistory, isLoading: chatHistoryLoading } = useQuery({
-    queryKey: ["/api/dashboard/chat-history", persona],
-    queryFn: async () => {
-      const res = await fetch(
-        `/api/dashboard/chat-history?persona=${persona}&limit=10`,
-      );
-      if (!res.ok) throw new Error("Failed to fetch chat history");
-      return res.json();
-    },
-    enabled: !!persona,
-    refetchInterval: 5000,
-  });
+  const mockChatHistory = {
+    chats: [
+      { id: 1, user: "Sarah Williams", avatar: "👩‍💼", timestamp: "2025-01-05 09:45", query: "Show invoice status", sentiment: "positive", agentHandover: "No" },
+      { id: 2, user: "Michael Chen", avatar: "👨‍💼", timestamp: "2025-01-05 09:32", query: "List pending approvals", sentiment: "positive", agentHandover: "No" },
+      { id: 3, user: "Emma Johnson", avatar: "👩‍💻", timestamp: "2025-01-05 09:18", query: "Generate Q4 report", sentiment: "neutral", agentHandover: "Yes" },
+    ]
+  };
 
-  const { data: chatMetrics, isLoading: chatMetricsLoading } = useQuery({
-    queryKey: ["/api/dashboard/chat-metrics", persona],
-    queryFn: async () => {
-      const res = await fetch(`/api/dashboard/chat-metrics?persona=${persona}`);
-      if (!res.ok) throw new Error("Failed to fetch chat metrics");
-      return res.json();
-    },
-    enabled: !!persona,
-    refetchInterval: 5000,
-  });
+  const analytics = {};
+  const queryAnalytics = mockQueryAnalytics;
+  const chatHistory = mockChatHistory;
+  const chatMetrics = mockChatMetrics;
+  const isLoading = false;
+  const queryAnalyticsLoading = false;
+  const chatHistoryLoading = false;
+  const chatMetricsLoading = false;
 
   if (
     isLoading ||
@@ -294,69 +292,121 @@ export default function Analytics({ persona }: AnalyticsProps) {
         </p>
       </div>
 
-      {/* Top Stats Row - 4 Metronic-Colored Cards */}
+      {/* Top Stats Row - 4 White Cards with Multi-Color Icons */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-        {/* Total Chat Sessions - Metronic Primary Blue */}
-        <Card className="p-6 bg-gradient-to-br from-[#3699FF] to-[#1A69FF] text-white shadow-lg hover:shadow-xl transition-shadow">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 rounded-lg bg-white/20 flex items-center justify-center">
-              <MessageSquare className="w-6 h-6 text-white" />
+        {/* Total Chat Sessions */}
+        <Card className="p-6 bg-white border border-gray-100 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-shadow">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+              <MessageSquare className="w-4 h-4 text-[#3B5998]" />
             </div>
-            <span className="text-xs font-semibold bg-white/30 px-2 py-1 rounded">
-              +2.2%
-            </span>
+            <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center">
+              <MessageCircle className="w-4 h-4 text-[#22C55E]" />
+            </div>
+            <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center">
+              <Activity className="w-4 h-4 text-[#E8744E]" />
+            </div>
           </div>
-          <div className="text-3xl font-bold mb-1">{totalQueries}</div>
-          <div className="text-sm text-white/90">Total Chat Sessions</div>
+          <h3 className="text-lg font-bold text-gray-900 mb-2">Total Chat Sessions</h3>
+          <p className="text-sm text-gray-500 mb-3">All user conversations tracked in the system</p>
+          <div className="text-3xl font-bold text-gray-900 mb-3">{totalQueries}</div>
+          <div className="flex flex-wrap gap-2 mb-3">
+            <span className="px-3 py-1.5 text-xs font-medium rounded-full bg-blue-50 text-[#3B5998]">Chat Analytics</span>
+            <span className="px-3 py-1.5 text-xs font-medium rounded-full bg-green-50 text-[#22C55E]">+2.2%</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="px-3 py-1.5 text-xs font-medium text-gray-500 bg-white border border-gray-200 rounded-full">Sessions</span>
+            <span className="px-3 py-1.5 text-xs font-medium text-gray-500 bg-white border border-gray-200 rounded-full">Messages</span>
+            <span className="px-3 py-1.5 text-xs font-medium text-gray-400 bg-gray-50 border border-gray-200 rounded-full">+2</span>
+          </div>
         </Card>
 
-        {/* Avg Response Time - Metronic Success Teal */}
-        <Card className="p-6 bg-gradient-to-br from-[#1BC5BD] to-[#0BB7A4] text-white shadow-lg hover:shadow-xl transition-shadow">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 rounded-lg bg-white/20 flex items-center justify-center">
-              <Clock className="w-6 h-6 text-white" />
+        {/* Avg Response Time */}
+        <Card className="p-6 bg-white border border-gray-100 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-shadow">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center">
+              <Clock className="w-4 h-4 text-[#22C55E]" />
             </div>
-            <span className="text-xs font-semibold bg-white/30 px-2 py-1 rounded">
-              -15%
-            </span>
+            <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center">
+              <TrendingUp className="w-4 h-4 text-[#3B5998]" />
+            </div>
+            <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-[#14B8A6]" />
+            </div>
           </div>
-          <div className="text-3xl font-bold mb-1">{avgResponseTime}s</div>
-          <div className="text-sm text-white/90">Avg Response Time</div>
+          <h3 className="text-lg font-bold text-gray-900 mb-2">Avg Response Time</h3>
+          <p className="text-sm text-gray-500 mb-3">Average time to first response from agents</p>
+          <div className="text-3xl font-bold text-gray-900 mb-3">{avgResponseTime}s</div>
+          <div className="flex flex-wrap gap-2 mb-3">
+            <span className="px-3 py-1.5 text-xs font-medium rounded-full bg-green-50 text-[#22C55E]">Performance</span>
+            <span className="px-3 py-1.5 text-xs font-medium rounded-full bg-blue-50 text-[#3B5998]">-15%</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="px-3 py-1.5 text-xs font-medium text-gray-500 bg-white border border-gray-200 rounded-full">Speed</span>
+            <span className="px-3 py-1.5 text-xs font-medium text-gray-500 bg-white border border-gray-200 rounded-full">Latency</span>
+            <span className="px-3 py-1.5 text-xs font-medium text-gray-400 bg-gray-50 border border-gray-200 rounded-full">+1</span>
+          </div>
         </Card>
 
-        {/* Active Users - Metronic Warning Orange */}
-        <Card className="p-6 bg-gradient-to-br from-[#FFA800] to-[#EE9700] text-white shadow-lg hover:shadow-xl transition-shadow">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 rounded-lg bg-white/20 flex items-center justify-center">
-              <Users className="w-6 h-6 text-white" />
+        {/* Active Users */}
+        <Card className="p-6 bg-white border border-gray-100 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-shadow">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center">
+              <Users className="w-4 h-4 text-[#E8744E]" />
             </div>
-            <span className="text-xs font-semibold bg-white/30 px-2 py-1 rounded">
-              Live
-            </span>
+            <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center">
+              <Activity className="w-4 h-4 text-[#22C55E]" />
+            </div>
+            <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center">
+              <TrendingUp className="w-4 h-4 text-[#3B5998]" />
+            </div>
           </div>
-          <div className="text-3xl font-bold mb-1">{activeSessions}</div>
-          <div className="text-sm text-white/90">Active Users Today</div>
+          <h3 className="text-lg font-bold text-gray-900 mb-2">Active Users Today</h3>
+          <p className="text-sm text-gray-500 mb-3">Users currently active in the system</p>
+          <div className="text-3xl font-bold text-gray-900 mb-3">{activeSessions}</div>
+          <div className="flex flex-wrap gap-2 mb-3">
+            <span className="px-3 py-1.5 text-xs font-medium rounded-full bg-orange-50 text-[#E8744E]">User Activity</span>
+            <span className="px-3 py-1.5 text-xs font-medium rounded-full bg-green-50 text-[#22C55E]">Live</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="px-3 py-1.5 text-xs font-medium text-gray-500 bg-white border border-gray-200 rounded-full">Online</span>
+            <span className="px-3 py-1.5 text-xs font-medium text-gray-500 bg-white border border-gray-200 rounded-full">Active</span>
+            <span className="px-3 py-1.5 text-xs font-medium text-gray-400 bg-gray-50 border border-gray-200 rounded-full">+2</span>
+          </div>
         </Card>
 
-        {/* Positive Sentiment - Metronic Purple */}
-        <Card className="p-6 bg-gradient-to-br from-[#8950FC] to-[#7337EE] text-white shadow-lg hover:shadow-xl transition-shadow">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 rounded-lg bg-white/20 flex items-center justify-center">
-              <ThumbsUp className="w-6 h-6 text-white" />
+        {/* Positive Sentiment */}
+        <Card className="p-6 bg-white border border-gray-100 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-shadow">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center">
+              <ThumbsUp className="w-4 h-4 text-[#14B8A6]" />
             </div>
-            <span className="text-xs font-semibold bg-white/30 px-2 py-1 rounded">
-              Excellent
-            </span>
+            <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-[#E8744E]" />
+            </div>
+            <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center">
+              <Activity className="w-4 h-4 text-[#3B5998]" />
+            </div>
           </div>
-          <div className="text-3xl font-bold mb-1">{sentimentPositive}%</div>
-          <div className="text-sm text-white/90">Positive Sentiment</div>
+          <h3 className="text-lg font-bold text-gray-900 mb-2">Positive Sentiment</h3>
+          <p className="text-sm text-gray-500 mb-3">User satisfaction based on interactions</p>
+          <div className="text-3xl font-bold text-gray-900 mb-3">{sentimentPositive}%</div>
+          <div className="flex flex-wrap gap-2 mb-3">
+            <span className="px-3 py-1.5 text-xs font-medium rounded-full bg-teal-50 text-[#14B8A6]">Sentiment</span>
+            <span className="px-3 py-1.5 text-xs font-medium rounded-full bg-green-50 text-[#22C55E]">Excellent</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="px-3 py-1.5 text-xs font-medium text-gray-500 bg-white border border-gray-200 rounded-full">Satisfaction</span>
+            <span className="px-3 py-1.5 text-xs font-medium text-gray-500 bg-white border border-gray-200 rounded-full">Feedback</span>
+            <span className="px-3 py-1.5 text-xs font-medium text-gray-400 bg-gray-50 border border-gray-200 rounded-full">+1</span>
+          </div>
         </Card>
       </div>
 
       {/* Charts Section - 2 Column Layout with Colored Accents */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         {/* Chat Activity Chart */}
-        <Card className="p-6 shadow-lg border border-t-4 border-t-[#3699FF]">
+        <Card className="p-6 bg-white border border-gray-100 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
           <div className="mb-4">
             <h3 className="text-lg font-semibold text-foreground">Chat Activity</h3>
             <p className="text-sm text-muted-foreground">Query volume over 24 hours</p>
@@ -392,7 +442,7 @@ export default function Analytics({ persona }: AnalyticsProps) {
         </Card>
 
         {/* Response Performance Chart */}
-        <Card className="p-6 shadow-lg border border-t-4 border-t-[#1BC5BD]">
+        <Card className="p-6 bg-white border border-gray-100 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
           <div className="mb-4">
             <h3 className="text-lg font-semibold text-foreground">Response Performance</h3>
             <p className="text-sm text-muted-foreground">Average response time trends</p>
@@ -425,7 +475,7 @@ export default function Analytics({ persona }: AnalyticsProps) {
       {/* Second Row - Sentiment and Recent Chats */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Sentiment Analysis */}
-        <Card className="p-6 shadow-lg border border-t-4 border-t-[#8950FC]">
+        <Card className="p-6 bg-white border border-gray-100 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
           <div className="mb-4">
             <h3 className="text-lg font-semibold text-foreground">Sentiment Analysis</h3>
             <p className="text-sm text-muted-foreground">User satisfaction</p>
@@ -465,7 +515,7 @@ export default function Analytics({ persona }: AnalyticsProps) {
         </Card>
 
         {/* Command Analytics */}
-        <Card className="xl:col-span-2 p-6 shadow-lg border border-t-4 border-t-[#FFA800]">
+        <Card className="xl:col-span-2 p-6 bg-white border border-gray-100 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
           <div className="mb-4">
             <h3 className="text-lg font-semibold text-foreground">Command Analytics</h3>
             <p className="text-sm text-muted-foreground">Historical command execution data</p>
@@ -516,41 +566,65 @@ export default function Analytics({ persona }: AnalyticsProps) {
         </Card>
       </div>
 
-      {/* Finance-Specific Metrics - Metronic Colors */}
+      {/* Finance-Specific Metrics */}
       {persona === "finance-accounting" && queryAnalytics?.queryTypeStats && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="p-6 bg-gradient-to-br from-[#3699FF] to-[#1A69FF] text-white shadow-lg hover:shadow-xl transition-shadow">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-12 h-12 rounded-lg bg-white/20 flex items-center justify-center">
-                <Activity className="w-6 h-6 text-white" />
+          <Card className="p-6 bg-white border border-gray-100 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-shadow">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+                <Activity className="w-4 h-4 text-[#3B5998]" />
+              </div>
+              <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center">
+                <MessageSquare className="w-4 h-4 text-[#22C55E]" />
               </div>
             </div>
-            <div className="text-3xl font-bold mb-1">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Invoice Queries</h3>
+            <p className="text-sm text-gray-500 mb-3">Queries related to invoices</p>
+            <div className="text-3xl font-bold text-gray-900 mb-3">
               {(queryAnalytics as any).queryTypeStats.invoice ?? 127}
             </div>
-            <div className="text-sm text-white/90">Invoice Queries</div>
+            <div className="flex flex-wrap gap-2">
+              <span className="px-3 py-1.5 text-xs font-medium rounded-full bg-blue-50 text-[#3B5998]">Finance</span>
+              <span className="px-3 py-1.5 text-xs font-medium rounded-full bg-orange-50 text-[#E8744E]">Invoices</span>
+            </div>
           </Card>
-          <Card className="p-6 bg-gradient-to-br from-[#F64E60] to-[#EE3D4A] text-white shadow-lg hover:shadow-xl transition-shadow">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-12 h-12 rounded-lg bg-white/20 flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-white" />
+          <Card className="p-6 bg-white border border-gray-100 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-shadow">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center">
+                <TrendingUp className="w-4 h-4 text-[#22C55E]" />
+              </div>
+              <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center">
+                <Clock className="w-4 h-4 text-[#E8744E]" />
               </div>
             </div>
-            <div className="text-3xl font-bold mb-1">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Approval Queries</h3>
+            <p className="text-sm text-gray-500 mb-3">Queries for approvals</p>
+            <div className="text-3xl font-bold text-gray-900 mb-3">
               {(queryAnalytics as any).queryTypeStats.approval ?? 89}
             </div>
-            <div className="text-sm text-white/90">Approval Queries</div>
+            <div className="flex flex-wrap gap-2">
+              <span className="px-3 py-1.5 text-xs font-medium rounded-full bg-green-50 text-[#22C55E]">Approvals</span>
+              <span className="px-3 py-1.5 text-xs font-medium rounded-full bg-blue-50 text-[#3B5998]">Workflow</span>
+            </div>
           </Card>
-          <Card className="p-6 bg-gradient-to-br from-[#8950FC] to-[#7337EE] text-white shadow-lg hover:shadow-xl transition-shadow">
-            <div className="flex items-center justify-between mb-3">
-              <div className="w-12 h-12 rounded-lg bg-white/20 flex items-center justify-center">
-                <Sparkles className="w-6 h-6 text-white" />
+          <Card className="p-6 bg-white border border-gray-100 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] transition-shadow">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center">
+                <Sparkles className="w-4 h-4 text-[#14B8A6]" />
+              </div>
+              <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center">
+                <Activity className="w-4 h-4 text-[#3B5998]" />
               </div>
             </div>
-            <div className="text-3xl font-bold mb-1">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Status Queries</h3>
+            <p className="text-sm text-gray-500 mb-3">Queries for status updates</p>
+            <div className="text-3xl font-bold text-gray-900 mb-3">
               {(queryAnalytics as any).queryTypeStats.status ?? 126}
             </div>
-            <div className="text-sm text-white/90">Status Queries</div>
+            <div className="flex flex-wrap gap-2">
+              <span className="px-3 py-1.5 text-xs font-medium rounded-full bg-teal-50 text-[#14B8A6]">Status</span>
+              <span className="px-3 py-1.5 text-xs font-medium rounded-full bg-orange-50 text-[#E8744E]">Tracking</span>
+            </div>
           </Card>
         </div>
       )}
@@ -558,7 +632,7 @@ export default function Analytics({ persona }: AnalyticsProps) {
       {/* Command History Section */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         {/* Command History Table */}
-        <Card className="p-6 shadow-lg border border-t-4 border-t-[#3699FF]">
+        <Card className="p-6 bg-white border border-gray-100 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
           <div className="mb-4">
             <h3 className="text-lg font-semibold text-foreground">Command History</h3>
             <p className="text-sm text-muted-foreground">Recent executed commands</p>

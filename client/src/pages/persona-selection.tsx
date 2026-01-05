@@ -229,8 +229,8 @@ export default function PersonaSelection() {
             }}
             className={`${sidebarOpen ? "w-full justify-start px-3" : "w-10 justify-center"} h-10 rounded-lg flex items-center gap-3 transition-colors ${
               selectedPersona === "generic" && activeNavItem === ""
-                ? "bg-[#f87a00] text-white"
-                : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                ? "bg-blue-50 text-[#3B5998]"
+                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
             }`}
             title="Home"
             data-testid="button-home"
@@ -255,11 +255,11 @@ export default function PersonaSelection() {
                   key={index}
                   onClick={() => setActiveNavItem(item.label)}
                   className={`${sidebarOpen ? "w-full justify-start px-3" : "w-10 justify-center"} 
-                              h-10 py-5 rounded-lg flex items-center gap-3 transition-colors 
+                              h-10 py-5 rounded-xl flex items-center gap-3 transition-colors 
                               ${
                                 isActive
-                                  ? "bg-gray-100 text-primary"
-                                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                                  ? "bg-blue-50 text-[#3B5998] font-medium"
+                                  : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
                               }`}
                   title={item.label}
                   data-testid={`sidebar-icon-${item.label.toLowerCase()}`}
@@ -372,7 +372,7 @@ export default function PersonaSelection() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className="px-4 py-2 text-primary border border-primary/30 rounded-md hover:bg-secondary transition-colors font-medium flex items-center gap-2"
+                  className="px-4 py-2 text-[#2E5AAC] border border-[#2E5AAC]/30 rounded-lg hover:bg-blue-50 transition-colors font-medium flex items-center gap-2"
                   data-testid="button-select-persona"
                 >
                   Role
@@ -434,6 +434,7 @@ export default function PersonaSelection() {
               "Dashboard",
               "Analytics",
               "Feedback",
+              "Data Feedback",
               "Repository",
               "Admin",
               "",
