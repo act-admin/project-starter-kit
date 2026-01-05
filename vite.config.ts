@@ -29,13 +29,14 @@ export default defineConfig({
     emptyOutDir: true,
   },
   server: {
+    port: 8080,
     fs: {
       strict: true,
       deny: ["**/.*"],
     },
     allowedHosts: [
-      "billiondollarblankscreen.scodac.com", // 👈 your custom domain
-      ".scodac.com", // 👈 optional: allows all subdomains under scodac.com
+      "billiondollarblankscreen.scodac.com",
+      ".scodac.com",
     ],
   },
 });
